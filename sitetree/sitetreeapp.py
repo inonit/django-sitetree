@@ -535,11 +535,8 @@ class SiteTree(object):
                 view_path = url.split(' ')
                 # We should try to resolve URL parameters from site tree item.
                 for view_argument in view_path[1:]:
-                    resolved = self.resolve_var(view_argument)
-                    # In case of non-ascii data we leave variable unresolved.
-                    if isinstance(resolved, six.text_type):
-                        if resolved.encode('ascii', 'ignore').decode('ascii') != resolved:
-                            resolved = view_argument
+                    urlquoted_view_argument = urlquote(view_argument)
+                    resolved = self.resolve_var(urlquoted_view_argument)
 
                     # We enclose arg in double quotes as already resolved.
                     all_arguments.append('"%s"' % str(resolved))
@@ -550,7 +547,7 @@ class SiteTree(object):
 
             url_pattern = u'%s %s' % (view_path, ' '.join(all_arguments))
         else:
-            url_pattern = str(sitetree_item.url)
+            url_pattern = urlquote(sitetree_item.url)
 
         # i18n_patterns compatibility organized using compound cache key.
         cache_key = '%s%s' % (sitetree_item.tree.alias, self.lang_get())
